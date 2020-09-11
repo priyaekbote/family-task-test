@@ -6,7 +6,9 @@ public class MenuItem
     public string iconColor { get; set; }
     public string label { get; set; }
     public Guid referenceId { get; set; }
-    
+    public bool dropZoneSelector { get; set; }
+
+
     protected virtual void OnClickCallback(object e)
     {
         EventHandler<object> handler = ClickCallback;

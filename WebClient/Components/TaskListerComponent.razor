@@ -1,6 +1,5 @@
-
 @namespace FamilyTask.Components
-
+@inject WebClient.Abstractions.ITaskDataService TaskDataService
 <style>
     .task-wrapper .task-item {
         background: #FFFFFF;
@@ -10,26 +9,32 @@
         font-size: 24px;
         font-family: "Poppins Light";
     }
+
     .done-text {
         text-decoration: line-through;
     }
+
     .task-wrapper .avtar {
         width: 32px;
         height: 32px;
         border-radius: 50%;
     }
-    @@media(max-width: 1400px) { 
-        .task-wrapper .task-item { 
+
+    @@media(max-width: 1400px) {
+        .task-wrapper .task-item {
             font-size: 16px;
         }
+
         .task-wrapper .avtar {
             width: 24px;
             height: 24px;
         }
+
         .delete-icon {
             width: 25px;
         }
     }
+
     @@media(max-width: 767.98px) {
         .task-wrapper .avtar {
             width: 16px;
@@ -41,22 +46,44 @@
 <div class="task-wrapper">
     @foreach (var item in Tasks)
     {
-        <div class="task-item p-3 my-3 row m-0">
-            <div class="col-10 p-0">
-                <Check TValue="bool" Checked="@item.isDone" CheckedChanged="@(val => item.isDone = val)">
-                    <span class="@(item.isDone ? "done-text" : "")">@item.text</span>
-                </Check>
-            </div>
-            <div class="col-2 p-0 d-flex justify-content-end align-items-center">
-                @if (item.member != null) {
-                    <div class="avtar mr-1" style="background-color: @item.member.avtar;"></div>
-                }
-                <img class="delete-icon" src="/assets/images/delete-icon.svg"/>
-            </div>
+    <div class="task-item p-3 my-3 row m-0" draggable="true" @ondragstart="@(e => OnTaskDragged(item))">
+        <div class="col-10 p-0">
+            <Check TValue="bool" Checked="@item.isDone" CheckedChanged="@(val => item.isDone = val)" @onclick="@(e => onUpdateTaskClick(item, !item.isDone))" >
+                <span class="@(item.isDone ? "done-text" : "")">@item.text</span>
+            </Check>
         </div>
+        <div class="col-2 p-0 d-flex justify-content-end align-items-center">
+            @if (item.member != null)
+            {
+                <div class="avtar mr-1" style="background-color: @item.member.avtar;"></div>
+            }
+            <img class="delete-icon" src="/assets/images/delete-icon.svg" />
+        </div>
+    </div>
     }
 </div>
 
 @code  {
     [Parameter] public TaskModel[] Tasks { get; set; }
+
+    [Parameter] public TaskModel Task { get; set; }
+
+    [Parameter] public EventCallback<TaskModel> TaskChanged { get; set; }
+
+    private async void onUpdateTaskClick(TaskModel taskModel, bool toggleStatus)
+    {
+        await TaskDataService.Update(new Domain.Commands.UpdateTaskCommand
+        {
+            Id = taskModel.id,
+            Subject = taskModel.text,
+            IsComplete = toggleStatus,
+            AssignedToId = taskModel.member?.id
+        });
+    }
+
+    private Task OnTaskDragged(TaskModel task)
+    {
+        Task = task;
+        return TaskChanged.InvokeAsync(Task);
+    }
 }

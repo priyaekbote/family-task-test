@@ -34,7 +34,7 @@ namespace WebClient.Pages
                         email = item.Email,
                         firstname = item.FirstName,
                         lastname = item.LastName,
-                        role = item.Roles,
+                        role = item.Role,
                         id = item.Id
                     });
                 }
@@ -78,7 +78,7 @@ namespace WebClient.Pages
                     email = result.Payload.Email,
                     firstname = result.Payload.FirstName,
                     lastname = result.Payload.LastName,
-                    role = result.Payload.Roles,
+                    role = result.Payload.Role,
                     id = result.Payload.Id
                 });
 
